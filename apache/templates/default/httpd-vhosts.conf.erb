@@ -1,0 +1,253 @@
+#
+# This file is managed by Chef for <%= node['fqdn'] %>
+# Do NOT modify this file directly.
+#
+NameVirtualHost *:80
+
+#
+# nanapi.jp
+#
+Listen 10080
+<VirtualHost *:80 *:10080>
+    ServerName  nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/nanapi.jp/
+
+    # resize image
+    <Location />
+        Options +ExecCGI
+        AddHandler perl-script .pl
+        PerlResponseHandler +ModPerl::RegistryPrefork
+        PerlOptions +ParseHeaders
+    </Location>
+
+    Include conf/extra/image.conf
+    Alias /lite <% node.nanapi.root %>/apps/lite/webroot/index.php
+
+    RewriteCond %{REQUEST_URI} ^/\d+:\d+/?
+    RewriteRule  ^/([0-9]+):([0-9]+)/?(.*) <% node.nanapi.root %>/apps/rapid/app/webroot/index.php?__url=title/view/$1&version=$2&$3&%{QUERY_STRING} [L]
+    RewriteCond %{REQUEST_URI} ^/\d+/?
+    RewriteRule  ^/([0-9]+)/?(.*)          <% node.nanapi.root %>/apps/rapid/app/webroot/index.php?__url=title/view/$1&version=&$2&%{QUERY_STRING} [L]
+    RewriteRule ^/rapid/(.*) <% node.nanapi.root %>/apps/rapid/app/webroot/index.php?__url=$1&%{QUERY_STRING} [L]
+
+    <Directory <%= node.apache.root %>/vhosts/nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+    </Directory>
+</VirtualHost>
+
+#
+# nanapi.jp
+#
+Listen 10443
+<VirtualHost *:10443>
+    ServerName  nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/nanapi.jp/
+
+    SSLEngine on
+    SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
+    SSLCertificateFile    conf/ssl2/ssl.nanapi.jp.crt
+    SSLCACertificateFile  conf/ssl2/inter.crt
+    SSLCertificateKeyFile conf/ssl2/ssl.nanapi.jp.nopass.key
+
+    # resize image
+    <Location />
+        Options +ExecCGI
+        AddHandler perl-script .pl
+        PerlResponseHandler +ModPerl::RegistryPrefork
+        PerlOptions +ParseHeaders
+    </Location>
+
+    Include conf/extra/image.conf
+    Alias /lite <% node.nanapi.root %>/apps/lite/webroot/index.php
+
+    RewriteCond %{REQUEST_URI} ^/\d+:\d+/?
+    RewriteRule  ^/([0-9]+):([0-9]+)/?(.*) <% node.nanapi.root %>/apps/rapid/app/webroot/index.php?__url=title/view/$1&version=$2&$3&%{QUERY_STRING} [L]
+    RewriteCond %{REQUEST_URI} ^/\d+/?
+    RewriteRule  ^/([0-9]+)/?(.*)          <% node.nanapi.root %>/apps/rapid/app/webroot/index.php?__url=title/view/$1&version=&$2&%{QUERY_STRING} [L]
+    RewriteRule ^/rapid/(.*) <% node.nanapi.root %>/apps/rapid/app/webroot/index.php?__url=$1&%{QUERY_STRING} [L]
+
+    <Directory <%= node.apache.root %>/vhosts/nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+    </Directory>
+</VirtualHost>
+
+#
+# filer
+#
+<VirtualHost *:80>
+    ServerName  localhost
+    ServerAlias filer101.intra.rkst.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/localhost
+
+    <Directory <%= node.apache.root %>/vhosts/localhost>
+        options followsymlinks
+        Allowoverride All
+    </Directory>
+
+    Alias /r <%= node.nanapi.root %>/data/r_image
+    Alias /u <%= node.nanapi.root %>/data/u_image
+    Alias /recipe_data <%= node.nanapi.root %>/data/recipe_data
+
+    Script PUT    /filer/put.php
+    Script DELETE /filer/delete.php
+    Script GET    /filer/get.php
+</VirtualHost>
+
+#
+# m.nanapi.jp
+#
+Listen 17080
+<VirtualHost *:80 *:17080>
+    ServerName m.nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/m.nanapi.jp/
+
+    <Directory <%= node.apache.root %>/vhosts/m.nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+    </Directory>
+</VirtualHost>
+
+#
+# 7pi.jp
+#
+Listen 20080
+<VirtualHost *:80 *:20080>
+    ServerName 7pi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/7pi.jp/
+
+    <Directory <%= node.apache.root %>/vhosts/7pi.jp/ >
+        options followsymlinks
+        Allowoverride All
+    </Directory>
+</VirtualHost>
+
+#
+# works.nanapi.jp
+#
+Listen 18080
+<VirtualHost *:80 *:18080>
+    ServerName works.nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/works.nanapi.jp/
+
+   <Location />
+      Options +ExecCGI
+      AddHandler perl-script .pl
+      PerlResponseHandler +ModPerl::RegistryPrefork
+      PerlOptions +ParseHeaders
+   </Location>
+
+    Include conf/extra/image.conf
+
+    <Directory <%= node.apache.root %>/vhosts/works.nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+        order deny,allow
+        allow from all
+    </Directory>
+</VirtualHost>
+
+Listen 18443
+<VirtualHost *:443 *:18443>
+    ServerName works.nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/works.nanapi.jp/
+    Include conf/extra/image.conf
+
+    # SSL
+    SSLEngine on
+    SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
+    SSLCertificateFile    conf/ssl2/ssl.nanapi.jp.crt
+    SSLCACertificateFile  conf/ssl2/inter.crt
+    SSLCertificateKeyFile conf/ssl2/ssl.nanapi.jp.nopass.key
+
+    <Directory <%= node.apache.root %>/vhosts/works.nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+        order deny,allow
+        allow from all
+    </Directory>
+</VirtualHost>
+
+#
+# admin.nanapi.jp
+#
+Listen 14080
+<VirtualHost *:80 *:14080>
+    ServerName admin.nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/admin.nanapi.jp/
+    <Directory <%= node.apache.root %>/vhosts/admin.nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+        order deny,allow
+        allow from all
+    </Directory>
+</VirtualHost>
+
+#
+# api.nanapi.jp
+#
+Listen 13080
+<VirtualHost *:80 *:13080>
+    ServerName api.nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/api.nanapi.jp/
+    <Directory <%= node.apache.root %>/vhosts/api.nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+        order deny,allow
+        allow from all
+    </Directory>
+</VirtualHost>
+
+#
+# ad.nanapi.jp
+#
+Listen 23080
+<VirtualHost *:80 *:23080>
+    ServerName ad.nanapi.jp
+    DocumentRoot <%= node.apache.root %>/vhosts/ad.nanapi.jp/
+    <Directory <%= node.apache.root %>/vhosts/ad.nanapi.jp/ >
+        options followsymlinks
+        Allowoverride All
+        order deny,allow
+        allow from all
+    </Directory>
+</VirtualHost>
+
+#
+# p.nanapi.jp
+#
+Listen 19080
+<VirtualHost *:80 *:19080>
+    ServerName p.nanapi.jp
+    Include conf/extra/image.conf
+    <Location />
+	      Options +ExecCGI
+	      AddHandler perl-script .pl
+	      PerlResponseHandler +ModPerl::RegistryPrefork
+	      PerlOptions +ParseHeaders
+    </Location>
+</VirtualHost>
+
+#
+# s.nanapi.jp
+#
+Listen 12080
+<VirtualHost *:80 *:12080>
+    ServerName s.nanapi.jp
+    Alias /image /var/nanapi/data/upload_image
+    DocumentRoot <%= node.apache.root %>/vhosts/s.nanapi.jp
+</VirtualHost>
+
+Listen 12443
+<VirtualHost *:12443>
+    ServerName s.nanapi.jp
+
+    SSLEngine on
+    SSLCipherSuite ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP:+eNULL
+    SSLCertificateFile    conf/ssl2/ssl.nanapi.jp.crt
+    SSLCACertificateFile  conf/ssl2/inter.crt
+    SSLCertificateKeyFile conf/ssl2/ssl.nanapi.jp.nopass.key
+
+    Alias /image /var/nanapi/data/upload_image
+    DocumentRoot <%= node.apache.root %>/vhosts/s.nanapi.jp/
+</VirtualHost>

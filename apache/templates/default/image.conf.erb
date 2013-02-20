@@ -1,0 +1,25 @@
+RewriteEngine On
+
+# recipe_imageのディレクトリ移動対応
+RewriteCond %{REQUEST_URI} ^/r/\d{8}/.+\.jpg$
+RewriteCond <%= node.nanapi.root %>/data%{SCRIPT_FILENAME} !-f
+RewriteRule ^/r/\d{8}/(\d{4})(\d{2})(\d{2})(\d{2})(.+\.jpg) /r/$1/$2/$3/$4/$1$2$3$4$5
+
+# hand_writeのディレクトリ移動対応
+RewriteCond %{REQUEST_URI} ^/r/\d{8}/handwrite_.+\.png$
+RewriteCond <%= node.nanapi.root %>/data%{SCRIPT_FILENAME} !-f
+RewriteRule ^/r/(\d{4})(\d{2})(\d{2})/(.+\.png) /r/$1/$2/$3/00/$1$2$3$4
+
+# 画像がある場合・縮小あり
+RewriteCond %{SCRIPT_FILENAME} ^/[ruts]/
+RewriteCond %{QUERY_STRING} !size=org
+RewriteRule ^(.*) <%= node.nanapi.root %>/apps/p.nanapi.jp/webroot/resize.pl?%{QUERY_STRING}&path=$1 [L]
+
+# 画像がない場合・縮小なし
+RewriteCond %{SCRIPT_FILENAME} ^/[ruts]/
+RewriteCond <%= node.nanapi.root %>/data%{REQUEST_FILENAME} !-f
+RewriteRule ^(.*) <%= node.nanapi.root %>/data/common/img/user.jpg [QSA] # ない場合はこの画像
+
+# 画像がない場合
+Alias /u   <%= node.nanapi.root %>/data/u_image
+Alias /r   <%= node.nanapi.root %>/data/r_image

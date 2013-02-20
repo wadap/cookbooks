@@ -1,0 +1,11 @@
+#
+# This file is managed by Chef for <%= node['fqdn'] %>
+# Do NOT modify this file directly.
+#
+PidFile "logs/httpd.pid"
+ServerLimit 	     128
+StartServers         8
+MinSpareServers      16
+MaxSpareServers      16
+MaxClients           16
+MaxRequestsPerChild  8192
